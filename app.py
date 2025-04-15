@@ -1,8 +1,14 @@
 import streamlit as st
-import datetime
+from datetime import datetime
+import pytz
 import gspread
 import json
 from oauth2client.service_account import ServiceAccountCredentials
+
+india = pytz.timezone("Asia/Kolkata")
+now = datetime.now(india)
+
+st.write("Current IST Time:", now.strftime("%Y-%m-%d %H:%M:%S"))
 
 # Google Sheets auth setup using Streamlit secrets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
