@@ -40,6 +40,15 @@ if worker_name:
     # Optional comments
     comment = st.text_area("Any Comments (Optional)")
 
+# Get timezone from secrets
+timezone = st.secrets["timezone"]["zone"]
+
+# Set timezone
+tz = pytz.timezone(timezone)
+now = datetime.now(tz)
+
+st.write("Current IST Time:", now.strftime("%Y-%m-%d %H:%M:%S"))
+
     # Submit button
  if st.button("Submit Update"):
         india = pytz.timezone("Asia/Kolkata")
