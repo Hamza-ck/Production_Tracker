@@ -1,7 +1,20 @@
 import streamlit as st
+import os
+from google.oauth2 import service_account
 import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
+# Google Sheets ke access ke liye environment variable se credentials load karna
+creds = service_account.Credentials.from_service_account_file(
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS']
+)
+
+# Gspread client create karna
+client = gspread.authorize(creds)
+
+# Apna Google Sheet open karna
+#sheet = client.open('Production_Tracking')
 
 # Google Sheets auth setup
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
