@@ -46,8 +46,12 @@ if worker_name:
 
     # Submit button
     if st.button("Submit Update"):
-        now = datetime.datetime.now()
+        india = pytz.timezone("Asia/Kolkata")
+        now = datetime.now(india)
         timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+
+        # Optional: Show current IST time
+        st.write("Current IST Time:", timestamp)
 
         all_records = log_ws.get_all_records()
         updated = False
