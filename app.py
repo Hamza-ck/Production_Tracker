@@ -49,36 +49,34 @@ now = datetime.now(tz)
 
 st.write("Current IST Time:", now.strftime("%Y-%m-%d %H:%M:%S"))
 
-    # Submit button
- if st.button("Submit Update"):
-        india = pytz.timezone("Asia/Kolkata")
-        now = datetime.now(india)
-        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
-       
-        all_records = log_ws.get_all_records()
-        updated = False
+  # Submit button
+if st.button("Submit Update"):
+    india = pytz.timezone("Asia/Kolkata")
+    now = datetime.now(india)
+    timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
 
-        for idx, row in enumerate(all_records):
-            if (
-                row["UID"] == uid_selected
-                and row["Stage"] == stage_selected
-                and row["Worker Name"] == worker_name
-            ):
-                # If same row exists and End Time is empty, update it
-                if row["End Time"] == "":
-                    cell_row = idx + 2  # +2 because get_all_records skips header and gspread is 1-indexed
-                    log_ws.update_cell(cell_row, 5, timestamp)  # Column E = End Time
-                    if comment:
-                        log_ws.update_cell(cell_row, 6, comment)  # Column F = Comments
-                    st.success("✅ End Time updated successfully!")
-                    updated = True
-                    break
+    all_records = log_ws.get_all_records()
+    updated = False
 
-        if not updated and status == "Started":
-            # Append new row if not found and status is Started
-            log_ws.append_row([uid_selected, stage_selected, worker_name, timestamp, "", comment])
-            st.success("✅ New record added successfully!")
-        elif not updated and status == "Done":
-            st.warning("⚠️ No matching 'Started' record found for update.")
+    for idx, row in enumerate(all_records):
+        if (
+            row["UID"] == uid_selected
+            and row["Stage"] == stage_selected
+            and row["Worker Name"] == worker_name
+        ):
+            # If same row exists and End Time is empty, update it
+            if row["End Time"] == "":
+                cell_row = idx + 2  # +2 because get_all_records skips header and gspread is 1-indexed
+                log_ws.update_cell(cell_row, 5, timestamp)  # Column E = End Time
+                if comment:
+                    log_ws.update_cell(cell_row, 6, comment)  # Column F = Comments
+                st.success("✅ End Time updated successfully!")
+                updated = True
+                break
 
-    
+    if not updated and status == "Started":
+        # Append new row if not found and status is Started
+        log_ws.append_row([uid_selected, stage_selected, worker_name, timestamp, "", comment])
+        st.success("✅ New record added successfully!")
+    elif not updated and status == "Done":
+        st.warning("⚠️ No matching 'Started' record found for update.")
