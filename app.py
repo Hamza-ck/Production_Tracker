@@ -1,32 +1,19 @@
 import streamlit as st
-import os
-from google.oauth2 import service_account
 import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# Google Sheets ke access ke liye environment variable se credentials load karna
-creds = service_account.Credentials.from_service_account_file(
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS']
-)
-
-# Gspread client create karna
-client = gspread.authorize(creds)
-
-# Apna Google Sheet open karna
-#sheet = client.open('Production_Tracking')
-
-# Google Sheets auth setup
+# --- Google Sheets auth setup ---
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
 client = gspread.authorize(creds)
 
-# Google Sheet and Tabs
+# --- Open Sheet and Tabs ---
 sheet = client.open("Production_Tracking")
 uid_list_ws = sheet.worksheet("UID_List")
 log_ws = sheet.worksheet("Production_Log")
 
-# App layout
+# --- Streamlit UI ---
 st.set_page_config(page_title="Production Tracker", layout="centered")
 st.title("📦 Production Tracker App")
 
@@ -34,21 +21,21 @@ st.title("📦 Production Tracker App")
 worker_name = st.text_input("Enter Your Name")
 
 if worker_name:
-    # Fetch UID list
-    uids = uid_list_ws.col_values(1)[1:]  # Skip header
+    # UID select
+    uids = uid_list_ws.col_values(1)[1:]  # skip header
     uid_selected = st.selectbox("Select UID", uids)
 
-    # Stage selection
+    # Stage select
     stages = ["Cutting", "Stitching", "Handwork", "Embroidery", "Interlock", "Buttoning", "Ironing"]
     stage_selected = st.selectbox("Select Your Stage", stages)
 
-    # Status update
+    # Status
     status = st.radio("Update Status", ["Started", "Done"])
 
-    # Optional comments
+    # Optional comment
     comment = st.text_area("Any Comments (Optional)")
 
-    # Submit button
+    # Submit
     if st.button("Submit Update"):
         now = datetime.datetime.now()
         timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -58,28 +45,21 @@ if worker_name:
 
         for idx, row in enumerate(all_records):
             if (
-                row["UID"] == uid_selected
-                and row["Stage"] == stage_selected
-                and row["Worker Name"] == worker_name
+                row["UID"] == uid_selected and
+                row["Stage"] == stage_selected and
+                row["Worker Name"] == worker_name
             ):
-                # If same row exists and End Time is empty, update it
                 if row["End Time"] == "":
-                    cell_row = idx + 2  # +2 because get_all_records skips header and gspread is 1-indexed
-                    log_ws.update_cell(cell_row, 5, timestamp)  # Column E = End Time
+                    cell_row = idx + 2  # +2 because of header and 1-indexed
+                    log_ws.update_cell(cell_row, 5, timestamp)  # End Time
                     if comment:
-                        log_ws.update_cell(cell_row, 6, comment)  # Column F = Comments
+                        log_ws.update_cell(cell_row, 6, comment)  # Comments
                     st.success("✅ End Time updated successfully!")
                     updated = True
                     break
 
         if not updated and status == "Started":
-            # Append new row if not found and status is Started
             log_ws.append_row([uid_selected, stage_selected, worker_name, timestamp, "", comment])
             st.success("✅ New record added successfully!")
         elif not updated and status == "Done":
             st.warning("⚠️ No matching 'Started' record found for update.")
-
-
-        # Append row in correct column order
-        #log_ws.append_row([uid_selected, stage_selected, worker_name, start_time, end_time, comment])
-        #st.success("✅ Status updated successfully!")
