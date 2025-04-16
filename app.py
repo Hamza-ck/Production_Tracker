@@ -20,7 +20,7 @@ log_ws = sheet.worksheet("Production_Log")
 
 # App layout
 st.set_page_config(page_title="Production Tracker", layout="centered")
-st.title("📦 Production Tracker App")
+st.title("📦 Production Tracker App By Hamza")
 
 # Worker login
 worker_name = st.text_input("Enter Your Name")
